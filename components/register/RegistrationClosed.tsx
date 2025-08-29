@@ -46,7 +46,7 @@ export default function RegistrationClosed() {
         </div>
         
         <p className="text-sm text-white/60">
-          You will be automatically redirected to the home page, or you can click the "Back to Home" button above.
+          You will be automatically redirected to the home page, or you can click the &quot;Back to Home&quot; button above.
         </p>
       </div>
     </div>

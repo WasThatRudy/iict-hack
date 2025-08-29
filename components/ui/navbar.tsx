@@ -22,23 +22,23 @@ export default function AnimatedNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Function to track register button clicks
-  const trackClick = async (buttonType: string) => {
-    try {
-      await fetch('/api/clickTracking', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          buttonType,
-          userAgent: navigator.userAgent,
-          referrer: document.referrer,
-        }),
-      });
-    } catch (error) {
-      console.error('Failed to track click:', error);
-    }
-  };
+  // const trackClick = async (buttonType: string) => {
+  //   try {
+  //     await fetch('/api/clickTracking', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         buttonType,
+  //         userAgent: navigator.userAgent,
+  //         referrer: document.referrer,
+  //       }),
+  //     });
+  //   } catch (error) {
+  //     console.error('Failed to track click:', error);
+  //   }
+  // };
 
   useEffect(() => {
     const handleScroll = () => {
