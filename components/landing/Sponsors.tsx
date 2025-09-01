@@ -7,10 +7,16 @@ type Brand = {
   name: string;
   href: string;
   logo?: string; // remote image URL
-  tier?: 'Platinum Sponsor' | 'Gold Sponsor' | 'Silver Sponsor' | 'Bronze Sponsor';
+  tier?: 'Platinum Sponsor' | 'Gold Sponsor' | 'Silver Sponsor' | 'Bronze Sponsor' | 'Knowledge Partner';
 };
 
 const sponsors: Brand[] = [
+  {
+    name: 'CDAC',
+    href: 'https://www.cdac.in/',
+    tier: 'Knowledge Partner',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Logo_for_the_Centre_for_Development_of_Advanced_Computing.svg/250px-Logo_for_the_Centre_for_Development_of_Advanced_Computing.svg.png',
+  },
   {
     name: 'NVIDIA',
     href: 'https://www.nvidia.com/',
@@ -78,7 +84,8 @@ function ImageOrFallback({ brand }: { brand: Brand }) {
 }
 
 export default function SponsorsSection() {
-  const tiers: Array<'Platinum Sponsor' | 'Gold Sponsor' | 'Silver Sponsor' | 'Bronze Sponsor'> = [
+  const tiers: Array<'Platinum Sponsor' | 'Gold Sponsor' | 'Silver Sponsor' | 'Bronze Sponsor' | 'Knowledge Partner'> = [
+    'Knowledge Partner',
     'Platinum Sponsor',
     'Gold Sponsor',
     'Silver Sponsor',

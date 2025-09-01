@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import React from "react";
 
 interface SectionDecorationsProps {
-  variant?: "hero" | "themes" | "timeline" | "faq";
+  variant?: "hero" | "themes" | "timeline" | "faq" | "prizes";
   className?: string;
 }
 
@@ -328,6 +328,91 @@ export const SectionDecorations = ({ variant = "hero", className = "" }: Section
                 duration: 18,
                 repeat: Infinity,
                 ease: "linear"
+              }}
+            />
+          </>
+        );
+
+      case "prizes":
+        return (
+          <>
+            {/* Large golden circle with gradient - top center */}
+            <motion.div
+              className="absolute -top-20 left-1/2 transform -translate-x-1/2 w-80 h-80 rounded-full"
+              style={{
+                background: "radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, rgba(255, 193, 7, 0.05) 40%, rgba(0, 0, 0, 0.9) 100%)"
+              }}
+              animate={{
+                scale: [1, 1.05, 1],
+                opacity: [0.2, 0.3, 0.2],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+
+            {/* Trophy-inspired triangular shapes - left side */}
+            <div className="absolute top-1/4 -left-16 space-y-8">
+              {[...Array(2)].map((_, i) => (
+                <div
+                  key={`prizes-triangle-${i}`}
+                  className="w-16 h-16"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(200, 61, 173, 0.${10 + i * 3}) 0%, rgba(244, 129, 201, 0.${8 + i * 2}) 50%, rgba(0, 0, 0, 0.8) 100%)`,
+                    clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)"
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Floating coins/medals - right side */}
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={`prizes-coin-${i}`}
+                className="absolute rounded-full border"
+                style={{
+                  width: `${40 + i * 6}px`,
+                  height: `${40 + i * 6}px`,
+                  right: `${15 + i * 10}%`,
+                  top: `${25 + i * 15}%`,
+                  background: `radial-gradient(circle, rgba(255, 215, 0, 0.${8 - i}) 0%, rgba(255, 193, 7, 0.${6 - i}) 50%, rgba(0, 0, 0, 0.7) 100%)`,
+                  borderColor: `rgba(255, 215, 0, 0.${15 + i * 3})`
+                }}
+              />
+            ))}
+
+            {/* Large rectangle with prize gradient - bottom left */}
+            <div
+              className="absolute bottom-16 left-10 w-40 h-24 rounded-xl"
+              style={{
+                background: "linear-gradient(45deg, rgba(200, 61, 173, 0.12) 0%, rgba(222, 95, 185, 0.1) 30%, rgba(244, 129, 201, 0.08) 60%, rgba(0, 0, 0, 0.8) 100%)"
+              }}
+            />
+
+            {/* Star-like shapes scattered */}
+            {[...Array(2)].map((_, i) => (
+              <div
+                key={`prizes-star-${i}`}
+                className="absolute"
+                style={{
+                  width: `${20 + i * 8}px`,
+                  height: `${20 + i * 8}px`,
+                  left: `${30 + i * 20}%`,
+                  top: `${65 + i * 10}%`,
+                  background: `radial-gradient(circle, rgba(255, 215, 0, 0.${12 - i * 2}) 0%, rgba(255, 193, 7, 0.${8 - i}) 50%, rgba(0, 0, 0, 0.7) 100%)`,
+                  clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)"
+                }}
+              />
+            ))}
+
+            {/* Diamond accent - bottom right */}
+            <div
+              className="absolute bottom-20 right-16 w-20 h-20"
+              style={{
+                background: "linear-gradient(45deg, rgba(244, 129, 201, 0.15) 0%, rgba(222, 95, 185, 0.12) 50%, rgba(0, 0, 0, 0.8) 100%)",
+                clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)"
               }}
             />
           </>
