@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
@@ -19,7 +20,10 @@ import {
   Loader2,
   AlertCircle,
   Mail,
-  Building
+  Building,
+  Edit3,
+  Save,
+  X
 } from 'lucide-react';
 
 interface Participant {
@@ -50,11 +54,9 @@ interface Team {
 interface Submission {
   _id: string;
   team_id: string;
-  submission_url: string;
-  github_repo_url: string;
-  demo_video_url: string;
-  submission_text: string;
-  submission_date: string;
+  submission_document_url: Array<{[key: string]: string}>;
+  createdAt: string;
+  updatedAt: string;
   __v: number;
 }
 
@@ -69,6 +71,18 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isEditingSubmission, setIsEditingSubmission] = useState(false);
+  const [submissionLoading, setSubmissionLoading] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
+  const [submissionSuccess, setSubmissionSuccess] = useState('');
+  const [submissionUrls, setSubmissionUrls] = useState({
+    ppt: '',
+    repo: '',
+    video: ''
+  });
+  // Toggle this single variable to open/close submission manually
+  const SUBMISSION_WINDOW_OPEN = true;
+  const isSubmissionOpen = SUBMISSION_WINDOW_OPEN;
   const router = useRouter();
 
   const fetchDashboardData = async () => {
@@ -105,10 +119,118 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  // No auto-close; manual toggle via SUBMISSION_WINDOW_OPEN
+
+  // Extract submission URLs from the submission object
+  useEffect(() => {
+    if (dashboardData?.submission?.submission_document_url) {
+      const urls = { ppt: '', repo: '', video: '' };
+      dashboardData.submission.submission_document_url.forEach((item) => {
+        const key = Object.keys(item)[0];
+        const value = Object.values(item)[0];
+        if (key.toLowerCase().includes('ppt') || key.toLowerCase().includes('presentation')) {
+          urls.ppt = value;
+        } else if (key.toLowerCase().includes('repo')) {
+          urls.repo = value;
+        } else if (key.toLowerCase().includes('video')) {
+          urls.video = value;
+        }
+      });
+      setSubmissionUrls(urls);
+    }
+  }, [dashboardData]);
+
+  const handleSubmissionSave = async () => {
+    setSubmissionLoading(true);
+    setSubmissionError('');
+    setSubmissionSuccess('');
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      // Create the submission array in the required format
+      const submissionArray = [];
+      if (submissionUrls.ppt.trim()) {
+        submissionArray.push({ "ppt": submissionUrls.ppt.trim() });
+      }
+      if (submissionUrls.repo.trim()) {
+        submissionArray.push({ "repo": submissionUrls.repo.trim() });
+      }
+      if (submissionUrls.video.trim()) {
+        submissionArray.push({ "video": submissionUrls.video.trim() });
+      }
+
+      if (submissionArray.length === 0) {
+        setSubmissionError('Please provide at least one submission link');
+        setSubmissionLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/submission', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          submission: submissionArray
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmissionSuccess('Submission saved successfully!');
+        setIsEditingSubmission(false);
+        // Refresh dashboard data to get updated submission
+        await fetchDashboardData();
+      } else {
+        setSubmissionError(data.error || 'Failed to save submission');
+      }
+    } catch (err) {
+      setSubmissionError('Failed to save submission');
+      console.error('Submission save error:', err);
+    } finally {
+      setSubmissionLoading(false);
+    }
+  };
+
+  const handleStartEditing = () => {
+    setIsEditingSubmission(true);
+    setSubmissionError('');
+    setSubmissionSuccess('');
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditingSubmission(false);
+    setSubmissionError('');
+    setSubmissionSuccess('');
+    // Reset URLs to original values
+    if (dashboardData?.submission?.submission_document_url) {
+      const urls = { ppt: '', repo: '', video: '' };
+      dashboardData.submission.submission_document_url.forEach((item) => {
+        const key = Object.keys(item)[0];
+        const value = Object.values(item)[0];
+        if (key.toLowerCase().includes('ppt') || key.toLowerCase().includes('presentation')) {
+          urls.ppt = value;
+        } else if (key.toLowerCase().includes('repo')) {
+          urls.repo = value;
+        } else if (key.toLowerCase().includes('video')) {
+          urls.video = value;
+        }
+      });
+      setSubmissionUrls(urls);
+    }
+  };
 
 
   const handleLogout = () => {
@@ -303,14 +425,14 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-300 flex items-center gap-2">
-                    {submission ? 
+                    {submission && submission.submission_document_url && submission.submission_document_url.length > 0 ? 
                       <CheckCircle size={16} className="text-green-400" /> : 
                       <Clock size={16} className="text-gray-400" />
                     }
                     Submission
                   </span>
-                  <span className={`${submission ? 'text-green-400' : 'text-gray-400'} font-medium`}>
-                    {submission ? 'Submitted' : 'Not Submitted'}
+                  <span className={`${submission && submission.submission_document_url && submission.submission_document_url.length > 0 ? 'text-green-400' : 'text-gray-400'} font-medium`}>
+                    {submission && submission.submission_document_url && submission.submission_document_url.length > 0 ? 'Submitted' : 'Not Submitted'}
                   </span>
                 </div>
               </div>
@@ -411,40 +533,146 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Submission Section */}
-        {submission && (
-          <motion.div
-            className="mt-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-6 backdrop-blur-sm">
-              <div className="flex items-center gap-3 mb-6">
+        <motion.div
+          className="mt-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-6 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
                 <FileText size={24} className="text-[#C540AB]" />
                 <h3 className="text-xl font-semibold text-white">Project Submission</h3>
               </div>
+              {submission && !isEditingSubmission && isSubmissionOpen && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleStartEditing}
+                  className="flex items-center gap-2"
+                >
+                  <Edit3 size={16} />
+                  Edit
+                </Button>
+              )}
+            </div>
+
+            {/* Deadline Notice (shows only when open) */}
+            {isSubmissionOpen && (
+              <div className="mb-5 rounded-lg border px-4 py-3 bg-yellow-900/20 border-yellow-700/50">
+                <p className="text-sm text-yellow-300">
+                  Entries and edits close on <span className="font-semibold">13 September, 11:59 PM</span>.
+                </p>
+              </div>
+            )}
+
+            {/* Error and Success Messages */}
+            {submissionError && (
+              <div className="mb-4 p-3 bg-red-900/20 border border-red-700/50 rounded-lg">
+                <p className="text-red-400 text-sm">{submissionError}</p>
+              </div>
+            )}
+            {submissionSuccess && (
+              <div className="mb-4 p-3 bg-green-900/20 border border-green-700/50 rounded-lg">
+                <p className="text-green-400 text-sm">{submissionSuccess}</p>
+              </div>
+            )}
+
+            {((!submission) && isSubmissionOpen) || (isEditingSubmission && isSubmissionOpen) ? (
+              /* Submission Form */
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <Label className="text-gray-300 flex items-center gap-2 mb-2">
+                      <FileText size={14} />
+                      PPT/Presentation Link
+                    </Label>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/presentation"
+                      value={submissionUrls.ppt}
+                      onChange={(e) => setSubmissionUrls(prev => ({ ...prev, ppt: e.target.value }))}
+                      className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-300 flex items-center gap-2 mb-2">
+                      <Github size={14} />
+                      Repository Link
+                    </Label>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/repo"
+                      value={submissionUrls.repo}
+                      onChange={(e) => setSubmissionUrls(prev => ({ ...prev, repo: e.target.value }))}
+                      className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-300 flex items-center gap-2 mb-2">
+                      <Globe size={14} />
+                      Video Link
+                    </Label>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/video"
+                      value={submissionUrls.video}
+                      onChange={(e) => setSubmissionUrls(prev => ({ ...prev, video: e.target.value }))}
+                      className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    onClick={handleSubmissionSave}
+                    disabled={submissionLoading || !isSubmissionOpen}
+                    className="flex items-center gap-2"
+                  >
+                    {submissionLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Save size={16} />
+                    )}
+                    {submissionLoading ? 'Saving...' : 'Save Submission'}
+                  </Button>
+                  {isEditingSubmission && (
+                    <Button
+                      variant="outline"
+                      onClick={handleCancelEditing}
+                      disabled={submissionLoading}
+                      className="flex items-center gap-2"
+                    >
+                      <X size={16} />
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Submission Display */
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label className="text-gray-300 flex items-center gap-2">
                     <Calendar size={14} />
                     Submission Date
                   </Label>
-                  <p className="text-white font-medium mt-1">{formatDate(submission.submission_date)}</p>
+                  <p className="text-white font-medium mt-1">{submission?.updatedAt ? formatDate(submission.updatedAt) : '-'}</p>
                 </div>
                 <div>
                   <Label className="text-gray-300 flex items-center gap-2">
-                    <ExternalLink size={14} />
-                    Project URL
+                    <FileText size={14} />
+                    PPT/Presentation
                   </Label>
-                  {submission.submission_url ? (
+                  {submissionUrls.ppt ? (
                     <a
-                      href={submission.submission_url}
+                      href={submissionUrls.ppt}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#C540AB] hover:text-[#E055C3] font-medium mt-1 flex items-center gap-2 transition-colors"
                     >
                       <ExternalLink size={16} />
-                      View Project
+                      View Presentation
                     </a>
                   ) : (
                     <p className="text-gray-400 mt-1">Not provided</p>
@@ -453,16 +681,16 @@ const Dashboard = () => {
                 <div>
                   <Label className="text-gray-300 flex items-center gap-2">
                     <Github size={14} />
-                    GitHub Repository
+                    Repository Link
                   </Label>
-                  {submission.github_repo_url ? (
+                  {submissionUrls.repo ? (
                     <a
-                      href={submission.github_repo_url}
+                      href={submissionUrls.repo}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#C540AB] hover:text-[#E055C3] font-medium mt-1 flex items-center gap-2 transition-colors"
                     >
-                      <Github size={16} />
+                      <ExternalLink size={16} />
                       View Repository
                     </a>
                   ) : (
@@ -472,54 +700,31 @@ const Dashboard = () => {
                 <div>
                   <Label className="text-gray-300 flex items-center gap-2">
                     <Globe size={14} />
-                    Demo Video
+                    Video Link
                   </Label>
-                  {submission.demo_video_url ? (
+                  {submissionUrls.video ? (
                     <a
-                      href={submission.demo_video_url}
+                      href={submissionUrls.video}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#C540AB] hover:text-[#E055C3] font-medium mt-1 flex items-center gap-2 transition-colors"
                     >
                       <ExternalLink size={16} />
-                      Watch Demo
+                      Watch Video
                     </a>
                   ) : (
                     <p className="text-gray-400 mt-1">Not provided</p>
                   )}
                 </div>
-                {submission.submission_text && (
+                {!submission && !isSubmissionOpen && (
                   <div className="md:col-span-2">
-                    <Label className="text-gray-300">Project Description</Label>
-                    <p className="text-white mt-1 leading-relaxed">{submission.submission_text}</p>
+                    <p className="text-red-300 text-sm">No submission was made before the deadline.</p>
                   </div>
                 )}
               </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Actions */}
-        <motion.div
-          className="mt-8 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-          <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <Mail size={20} className="text-[#C540AB]" />
-              <h3 className="text-lg font-semibold text-white">Need Help?</h3>
-            </div>
-            <p className="text-gray-300 mb-4">
-              If you have any questions or need assistance, feel free to reach out to our support team.
-            </p>
-            <Button variant="outline" onClick={() => window.location.href = 'mailto:support@example.com'}>
-              <Mail size={16} className="mr-2" />
-              Contact Support
-            </Button>
+            )}
           </div>
-        </motion.div>
+        </motion.div>  
       </div>
     </div>
   );

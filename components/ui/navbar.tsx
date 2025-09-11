@@ -221,18 +221,20 @@ export default function AnimatedNavbar() {
       </AnimatePresence>
 
       {/* Logout Confirmation Modal */}
-      <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-lg md:hidden">
-      <ConfirmLogout
-        open={showLogoutConfirm}
-        onCancel={() => setShowLogoutConfirm(false)}
-        onConfirm={() => {
-          localStorage.removeItem('token');
-          setIsLoggedIn(false);
-          setShowLogoutConfirm(false);
-          router.push('/');
-          }}
-        />
-      </div>
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-lg md:hidden">
+          <ConfirmLogout
+            open={showLogoutConfirm}
+            onCancel={() => setShowLogoutConfirm(false)}
+            onConfirm={() => {
+              localStorage.removeItem('token');
+              setIsLoggedIn(false);
+              setShowLogoutConfirm(false);
+              router.push('/');
+            }}
+          />
+        </div>
+      )}
     </>
   );
 }
