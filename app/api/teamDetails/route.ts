@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { TeamRegistration, connectDB } from "@/lib/database";
+import { Submission, TeamRegistration, connectDB } from "@/lib/database";
 
 export async function GET(request: Request) {
     try {
@@ -59,6 +59,7 @@ export async function GET(request: Request) {
         // Find team details
         try {
             const team = await TeamRegistration.findById(decoded.team_id).select('-idea_document_url -selected');
+            const submission = await Submission.findOne({ team_id: decoded.team_id });
             if (!team) {
                 return NextResponse.json({
                     status: false,
@@ -69,7 +70,8 @@ export async function GET(request: Request) {
             return NextResponse.json({
                 status: true,
                 message: "Team details fetched successfully",
-                team
+                team,
+                submission
             });
 
         } catch (error) {
