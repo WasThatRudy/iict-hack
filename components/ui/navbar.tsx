@@ -35,6 +35,24 @@ export default function AnimatedNavbar() {
     const storedName = localStorage.getItem('team_name') || "";
     setTeamName(storedName);
   }, []);
+  // Sync auth state when route changes within the same tab
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+    const storedName = localStorage.getItem('team_name') || "";
+    setTeamName(storedName);
+  }, [pathname]);
+  // Listen for explicit auth updates dispatched within the same tab
+  useEffect(() => {
+    const handleAuthUpdated = () => {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+      const storedName = localStorage.getItem('team_name') || "";
+      setTeamName(storedName);
+    };
+    window.addEventListener('auth-updated', handleAuthUpdated as EventListener);
+    return () => window.removeEventListener('auth-updated', handleAuthUpdated as EventListener);
+  }, []);
   // Reflect token changes across tabs
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
@@ -147,6 +165,7 @@ export default function AnimatedNavbar() {
                 localStorage.removeItem('team_name');
                 setIsLoggedIn(false);
                 setTeamName("");
+                window.dispatchEvent(new Event('auth-updated'));
                 router.push('/');
               }}
             />
@@ -201,6 +220,7 @@ export default function AnimatedNavbar() {
                       localStorage.removeItem('team_name');
                       setIsLoggedIn(false);
                       setTeamName("");
+                      window.dispatchEvent(new Event('auth-updated'));
                       router.push('/');
                     }}
                   />
@@ -230,6 +250,7 @@ export default function AnimatedNavbar() {
               localStorage.removeItem('token');
               setIsLoggedIn(false);
               setShowLogoutConfirm(false);
+              window.dispatchEvent(new Event('auth-updated'));
               router.push('/');
             }}
           />

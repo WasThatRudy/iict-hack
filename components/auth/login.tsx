@@ -36,6 +36,7 @@ const Login = () => {
         localStorage.setItem('token', data.token);
         // Persist team name for navbar account menu
         localStorage.setItem('team_name', teamName);
+        window.dispatchEvent(new Event('auth-updated'));
         router.push('/dashboard');
       } else {
         setError(data.message || 'Login failed. Please try again.');

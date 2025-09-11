@@ -1,35 +1,54 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import defaults from "@/public/images/default.svg";
 import variant from "@/public/images/variant.svg";
+import { useRouter } from "next/navigation";
 
 // Animation variants removed for better performance on slow systems
 
 export function Hero() {
   // State to manage the hover effect for the logo
   const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [teamName, setTeamName] = useState("");
+  const router = useRouter();
 
-  // Function to track register button clicks
-  // const trackClick = async (buttonType: string) => {
-  //   try {
-  //     await fetch('/api/clickTracking', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         buttonType,
-  //         userAgent: navigator.userAgent,
-  //         referrer: document.referrer,
-  //       }),
-  //     });
-  //   } catch (error) {
-  //     console.error('Failed to track click:', error);
-  //   }
-  // };
+  // Initialize auth state on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+    const storedName = localStorage.getItem('team_name') || "";
+    setTeamName(storedName);
+  }, []);
+
+  // Listen for cross-tab updates
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        setIsLoggedIn(!!e.newValue);
+      }
+      if (e.key === 'team_name') {
+        setTeamName(e.newValue || "");
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  // Listen for explicit same-tab auth updates
+  useEffect(() => {
+    const handleAuthUpdated = () => {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+      const storedName = localStorage.getItem('team_name') || "";
+      setTeamName(storedName);
+    };
+    window.addEventListener('auth-updated', handleAuthUpdated as EventListener);
+    return () => window.removeEventListener('auth-updated', handleAuthUpdated as EventListener);
+  }, []);
 
   return (
     // Set background to black and default text to white
@@ -87,22 +106,15 @@ export function Hero() {
             </p>
           </div>
 
-          {/* Enhanced description */}
-          {/* <div>
-            <p className="text-sm md:text-lg text-white/80 leading-relaxed max-w-2xl mx-auto mb-8 font-inter">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
-          </div> */}
-
-          {/* Register Button with white glass effect */}
+          {/* Register/Login/Dashboard Button */}
           <div className="mt-6 sm:mt-8 md:mt-10 px-4">
             <motion.button
-              className="px-6 sm:px-8 py-3 sm:py-4 text-white/60 font-bold text-base sm:text-lg rounded-xl transition-all duration-300 font-inter
-                         bg-white/5 backdrop-blur-md border border-white/10 shadow-lg
-                         cursor-not-allowed w-full sm:w-auto max-w-xs sm:max-w-none mx-auto"
-              disabled
+              className="px-6 sm:px-8 py-3 sm:py-4 text-white font-bold text-base sm:text-lg rounded-full transition-all duration-300 bg-[#C83DAD] shadow-lg shadow-[#C83DAD]/20 hover:bg-[#A12A89] hover:shadow-[#A12A89]/20 cursor-pointer w-full sm:w-auto max-w-xs sm:max-w-none mx-auto"
+              onClick={() => router.push(isLoggedIn ? '/dashboard' : '/login')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Registration Closed
+              {isLoggedIn ? 'Dashboard' : 'Login'}
             </motion.button>
           </div>
         </div>
