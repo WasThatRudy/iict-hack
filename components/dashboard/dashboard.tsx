@@ -19,7 +19,6 @@ import {
   Loader2,
   AlertCircle,
   Mail,
-  Phone,
   Building
 } from 'lucide-react';
 
@@ -72,10 +71,6 @@ const Dashboard = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -110,6 +105,11 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+  
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem('token');

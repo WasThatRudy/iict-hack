@@ -8,6 +8,7 @@ import Image from "next/image";
 import logo from "@/public/images/shortlogo.png";
 import ConfirmLogout from "@/components/ui/confirm-logout";
 import AccountMenu from "@/components/ui/account-menu";
+import Link from "next/link";
 
 const navLinks = [
   { title: "Home", href: "#" },
@@ -117,21 +118,21 @@ export default function AnimatedNavbar() {
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
         {/* Logo */}
-        <a href="/" className="flex-shrink-0">
+        <Link href="/" className="flex-shrink-0">
           {/* Constraining image size with Tailwind classes for better control */}
           <Image src={logo} alt="Logo" className="h-14 w-auto" />
-        </a>
+        </Link>
 
         {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.title}
               href={link.href}
               className="font-semibold text-[#C83DAD] hover:text-[#A12A89] transition-colors duration-300"
             >
               {link.title}
-            </a>
+            </Link>
           ))}
         </div>
 

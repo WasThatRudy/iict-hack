@@ -41,8 +41,8 @@ const Login = () => {
         setError(data.message || 'Login failed. Please try again.');
         setTimeout(() => setError(''), 5000);
       }
-    } catch (e) {
-      setError('Something went wrong. Please try again.');
+    } catch (error) {
+      setError(`Something went wrong. Please try again: ${error}`);
       setTimeout(() => setError(''), 5000);
     } finally {
       setIsLoading(false);
