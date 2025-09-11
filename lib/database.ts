@@ -149,6 +149,64 @@ const teamRegistrationSchema = new mongoose.Schema(
   }
 );
 
+const authCredentialSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    team_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TeamRegistration",
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Simple, fast URL regex for http/https links
+const HTTP_URL_REGEX = /^(https?):\/\/[\w.-]+(?:\:[0-9]+)?(?:\/[\w\-._~:/?#[\]@!$&'()*+,;=%]*)?$/i;
+
+const submissionSchema = new mongoose.Schema(
+  {
+    team_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TeamRegistration",
+      required: true,
+    },
+    submission_document_url: [
+      {
+        // Store each entry as a single-key map of platform->url
+        type: Map,
+        of: String,
+        required: true,
+        validate: {
+          validator: function (value: Map<string, string>) {
+            if (!value || !(value instanceof Map)) return false;
+            if (value.size !== 1) return false;
+            const [[, url]] = Array.from(value.entries());
+            if (typeof url !== "string") return false;
+            const trimmed = url.trim();
+            return HTTP_URL_REGEX.test(trimmed);
+          },
+          message:
+            "Each submission item must be an object with exactly one http/https URL",
+        },
+      },
+    ],
+
+  },
+  {
+    timestamps: true,
+  }
+);
+
 // Export models
 export const College =
   mongoose.models.College || mongoose.model("College", collegeSchema);
@@ -156,3 +214,10 @@ export const College =
 export const TeamRegistration =
   mongoose.models.TeamRegistration ||
   mongoose.model("TeamRegistration", teamRegistrationSchema);
+
+export const AuthCredential =
+  mongoose.models.AuthCredential ||
+  mongoose.model("AuthCredential", authCredentialSchema);
+
+export const Submission =
+  mongoose.models.Submission || mongoose.model("Submission", submissionSchema);
