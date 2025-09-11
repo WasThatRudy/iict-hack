@@ -13,23 +13,23 @@ export function Hero() {
   const [isLogoHovered, setIsLogoHovered] = useState(false);
 
   // Function to track register button clicks
-  const trackClick = async (buttonType: string) => {
-    try {
-      await fetch('/api/clickTracking', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          buttonType,
-          userAgent: navigator.userAgent,
-          referrer: document.referrer,
-        }),
-      });
-    } catch (error) {
-      console.error('Failed to track click:', error);
-    }
-  };
+  // const trackClick = async (buttonType: string) => {
+  //   try {
+  //     await fetch('/api/clickTracking', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         buttonType,
+  //         userAgent: navigator.userAgent,
+  //         referrer: document.referrer,
+  //       }),
+  //     });
+  //   } catch (error) {
+  //     console.error('Failed to track click:', error);
+  //   }
+  // };
 
   return (
     // Set background to black and default text to white
@@ -96,20 +96,14 @@ export function Hero() {
 
           {/* Register Button with white glass effect */}
           <div className="mt-6 sm:mt-8 md:mt-10 px-4">
-            <a 
-              href="/register"
-              onClick={() => trackClick('hero_register')}
+            <motion.button
+              className="px-6 sm:px-8 py-3 sm:py-4 text-white/60 font-bold text-base sm:text-lg rounded-xl transition-all duration-300 font-inter
+                         bg-white/5 backdrop-blur-md border border-white/10 shadow-lg
+                         cursor-not-allowed w-full sm:w-auto max-w-xs sm:max-w-none mx-auto"
+              disabled
             >
-              <motion.button
-                className="px-6 sm:px-8 py-3 sm:py-4 text-white font-bold text-base sm:text-lg rounded-xl transition-all duration-300 font-inter
-                           bg-white/10 backdrop-blur-md border border-white/20 shadow-lg
-                           hover:bg-white/20 hover:shadow-xl w-full sm:w-auto max-w-xs sm:max-w-none mx-auto"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Register For Hackathon
-              </motion.button>
-            </a>
+              Registration Closed
+            </motion.button>
           </div>
         </div>
       </div>

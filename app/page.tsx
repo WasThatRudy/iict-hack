@@ -3,6 +3,7 @@ import { Timeline } from "@/components/landing/Timeline";
 import Themes from "@/components/landing/Themes";
 import Brief from "@/components/landing/FAQ";
 import SponsorsSection from "@/components/landing/Sponsors";
+import PrizePool from "@/components/landing/PrizePool";
 import { SectionDecorations } from "@/components/ui/section-decorations";
 import { Footer } from "@/components/ui/footer";
 
@@ -20,6 +21,10 @@ export default function Home() {
       <section id="timeline" className="min-h-screen relative">
         <SectionDecorations variant="timeline" />
         <Timeline/>
+      </section>
+      <section id="prizes" className="min-h-screen relative">
+        <SectionDecorations variant="prizes" />
+        <PrizePool />
       </section>
       <section id="sponsors" className="relative">
         <SectionDecorations variant="faq" />

@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'pointblank.club' },
       { protocol: 'https', hostname: 'www.pointblank.club' },
       { protocol: 'https', hostname: 'www.pointblank.club' },
+      { protocol: 'https', hostname: 'www.cdac.in' },
     ],
   },
 };
