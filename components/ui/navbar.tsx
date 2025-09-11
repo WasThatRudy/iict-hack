@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import logo from "@/public/images/shortlogo.png";
+import ConfirmLogout from "@/components/ui/confirm-logout";
+import AccountMenu from "@/components/ui/account-menu";
 
 const navLinks = [
   { title: "Home", href: "#" },
@@ -20,7 +22,31 @@ export default function AnimatedNavbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const router = useRouter();
+  const [teamName, setTeamName] = useState<string>("");
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+    const storedName = localStorage.getItem('team_name') || "";
+    setTeamName(storedName);
+  }, []);
+  // Reflect token changes across tabs
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        setIsLoggedIn(!!e.newValue);
+      }
+      if (e.key === 'team_name') {
+        setTeamName(e.newValue || "");
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
   // Function to track register button clicks
   // const trackClick = async (buttonType: string) => {
   //   try {
@@ -91,7 +117,7 @@ export default function AnimatedNavbar() {
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
         {/* Logo */}
-        <a href="#" className="flex-shrink-0">
+        <a href="/" className="flex-shrink-0">
           {/* Constraining image size with Tailwind classes for better control */}
           <Image src={logo} alt="Logo" className="h-14 w-auto" />
         </a>
@@ -109,16 +135,30 @@ export default function AnimatedNavbar() {
           ))}
         </div>
 
-        {/* Register Button */}
+        {/* Right Side: Auth/Account */}
         <div className="hidden md:block">
-          <motion.button
-            className="px-6 py-2 text-white/60 font-bold text-base rounded-full transition-all duration-300
-                          bg-[#C83DAD]/50 shadow-lg shadow-[#C83DAD]/20
-                          cursor-not-allowed"
-            disabled
-          >
-            Registration Closed
-          </motion.button>
+          {isLoggedIn ? (
+            <AccountMenu
+              teamName={teamName}
+              onGoToDashboard={() => router.push('/dashboard')}
+              onLogout={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('team_name');
+                setIsLoggedIn(false);
+                setTeamName("");
+                router.push('/');
+              }}
+            />
+          ) : (
+            <motion.button
+              className="px-6 py-2 text-white font-bold text-base rounded-full transition-all duration-300 bg-[#C83DAD] shadow-lg shadow-[#C83DAD]/20 hover:bg-[#A12A89] hover:shadow-[#A12A89]/20 cursor-pointer"
+              onClick={() => router.push('/login')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Login
+            </motion.button>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -149,18 +189,49 @@ export default function AnimatedNavbar() {
                   {link.title}
                 </a>
               ))}
-              <motion.button
-                className="px-8 py-4 text-white/60 font-bold text-xl rounded-full transition-all duration-300 mt-8
-                          bg-[#C83DAD]/50 shadow-lg shadow-[#C83DAD]/20
-                          cursor-not-allowed"
-                disabled
-              >
-                Registration Closed
-              </motion.button>
+              {isLoggedIn ? (
+                <div className="mt-8">
+                  <AccountMenu
+                    teamName={teamName || 'Team'}
+                    onGoToDashboard={() => { setIsMenuOpen(false); router.push('/dashboard'); }}
+                    onLogout={() => {
+                      setIsMenuOpen(false);
+                      localStorage.removeItem('token');
+                      localStorage.removeItem('team_name');
+                      setIsLoggedIn(false);
+                      setTeamName("");
+                      router.push('/');
+                    }}
+                  />
+                </div>
+              ) : (
+                <motion.button
+                  className="px-8 py-4 text-white font-bold text-xl rounded-full transition-all duration-300 mt-8 bg-[#C83DAD] shadow-lg shadow-[#C83DAD]/20 hover:bg-[#A12A89] hover:shadow-[#A12A89]/20 cursor-pointer"
+                  onClick={() => { setIsMenuOpen(false); router.push('/login'); }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Login
+                </motion.button>
+              )}
             </div>
           </div>
         )}
       </AnimatePresence>
+
+      {/* Logout Confirmation Modal */}
+      <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-lg md:hidden">
+      <ConfirmLogout
+        open={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          localStorage.removeItem('token');
+          setIsLoggedIn(false);
+          setShowLogoutConfirm(false);
+          router.push('/');
+          }}
+        />
+      </div>
     </>
   );
 }
