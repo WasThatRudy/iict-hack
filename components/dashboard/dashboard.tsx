@@ -590,7 +590,7 @@ const Dashboard = () => {
                     </Label>
                     <Input
                       type="url"
-                      placeholder="https://example.com/presentation"
+                      placeholder="Drive Link"
                       value={submissionUrls.ppt}
                       onChange={(e) => setSubmissionUrls(prev => ({ ...prev, ppt: e.target.value }))}
                       className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
@@ -603,7 +603,7 @@ const Dashboard = () => {
                     </Label>
                     <Input
                       type="url"
-                      placeholder="https://example.com/repo"
+                      placeholder="Github Link"
                       value={submissionUrls.repo}
                       onChange={(e) => setSubmissionUrls(prev => ({ ...prev, repo: e.target.value }))}
                       className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
@@ -616,7 +616,7 @@ const Dashboard = () => {
                     </Label>
                     <Input
                       type="url"
-                      placeholder="https://example.com/video"
+                      placeholder="Youtube Unlisted video link"
                       value={submissionUrls.video}
                       onChange={(e) => setSubmissionUrls(prev => ({ ...prev, video: e.target.value }))}
                       className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400"
