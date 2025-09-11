@@ -13,15 +13,13 @@ export function Hero() {
   // State to manage the hover effect for the logo
   const [isLogoHovered, setIsLogoHovered] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [teamName, setTeamName] = useState("");
   const router = useRouter();
 
   // Initialize auth state on mount
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
-    const storedName = localStorage.getItem('team_name') || "";
-    setTeamName(storedName);
+    // No need to read team_name here
   }, []);
 
   // Listen for cross-tab updates
@@ -30,9 +28,7 @@ export function Hero() {
       if (e.key === 'token') {
         setIsLoggedIn(!!e.newValue);
       }
-      if (e.key === 'team_name') {
-        setTeamName(e.newValue || "");
-      }
+      // Ignore team_name updates here
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
@@ -43,8 +39,6 @@ export function Hero() {
     const handleAuthUpdated = () => {
       const token = localStorage.getItem('token');
       setIsLoggedIn(!!token);
-      const storedName = localStorage.getItem('team_name') || "";
-      setTeamName(storedName);
     };
     window.addEventListener('auth-updated', handleAuthUpdated as EventListener);
     return () => window.removeEventListener('auth-updated', handleAuthUpdated as EventListener);
