@@ -26,7 +26,6 @@ interface TeamSubmission {
 
 export default function Home() {
   const [submissions, setSubmissions] = useState<TeamSubmission[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -39,7 +38,6 @@ export default function Home() {
       } catch (error) {
         console.error('Error fetching submissions:', error);
       } finally {
-        setLoading(false);
       }
     };
 

@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { connectDB, TeamRegistration, Submission } from "@/lib/database";
 
+interface Participant {
+  name: string;
+  github_profile?: string;
+  linkedin_profile?: string;
+}
+
 export async function GET() {
   try {
     await connectDB();
@@ -21,7 +27,7 @@ export async function GET() {
           team_name: team.team_name,
           idea_title: team.idea_title,
           idea_document_url: team.idea_document_url,
-          participants: team.participants.map((participant: any) => ({
+          participants: team.participants.map((participant: Participant) => ({
             name: participant.name,
             github_profile: participant.github_profile,
             linkedin_profile: participant.linkedin_profile
