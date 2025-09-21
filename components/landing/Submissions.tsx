@@ -27,6 +27,7 @@ interface SubmissionsProps {
 
 const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
   const [loading, setLoading] = useState(true);
+  const [showOtherSubmissions, setShowOtherSubmissions] = useState(false);
 
   useEffect(() => {
     // Simulate loading for better UX
@@ -34,13 +35,17 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Separate finalist and non-finalist teams
-  const finalistTeams = submissions.filter(team => team.submission?.status === 'finalist');
-  const otherTeams = submissions.filter(team => team.submission?.status !== 'finalist');
+  // Separate finalist and non-finalist teams, then sort alphabetically by team name
+  const finalistTeams = submissions
+    .filter(team => team.submission?.status === 'finalist')
+    .sort((a, b) => a.team_name.localeCompare(b.team_name));
+  const otherTeams = submissions
+    .filter(team => team.submission?.status !== 'finalist')
+    .sort((a, b) => a.team_name.localeCompare(b.team_name));
 
   if (loading) {
     return (
-      <section className="py-20 bg-black" id="submissions">
+      <section className="py-20" id="submissions">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-[#C83DAD] via-[#DE5FB9] to-[#F481C9] bg-clip-text text-transparent font-corsiva italic">
@@ -59,17 +64,18 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
     );
   }
 
-  const renderTeamRow = (team: TeamSubmission, isFinalist: boolean = false) => (
-    <motion.tr
+  const renderTeamCard = (team: TeamSubmission, isFinalist: boolean = false) => (
+    <motion.div
       key={team._id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={`border-b border-white/10 hover:bg-white/5 transition-all duration-300 ${
-        isFinalist ? 'bg-gradient-to-r from-[#C83DAD]/10 to-[#F481C9]/10' : ''
+      className={`bg-white/10 backdrop-blur-md rounded-lg border border-white/10 shadow-lg hover:shadow-xl hover:shadow-[#C83DAD]/30 hover:border-[#C83DAD]/60 hover:bg-white/20 transition-all duration-300 p-6 ${
+        isFinalist ? 'ring-2 ring-[#C83DAD]/50' : ''
       }`}
     >
-      <td className="px-4 py-6">
+      {/* Team Header */}
+      <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           {isFinalist && (
             <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-[#C83DAD] to-[#F481C9] text-white text-sm font-bold rounded-full">
@@ -77,13 +83,23 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
             </div>
           )}
           <div>
-            <h3 className="text-lg font-bold text-white">{team.team_name}</h3>
-            <p className="text-[#C83DAD] text-sm">{team.idea_title}</p>
+            <h3 className="text-xl font-bold text-white">{team.team_name}</h3>
+            <p className="text-[#C83DAD] text-sm font-medium">{team.idea_title}</p>
           </div>
         </div>
-      </td>
-      
-      <td className="px-4 py-6">
+      </div>
+
+      {/* Abstract Section */}
+      <div className="mb-6">
+        <h4 className="text-sm font-semibold text-[#C83DAD] mb-2">Abstract</h4>
+        <p className="text-white/80 text-sm leading-relaxed">
+          {team.submission?.abstract || 'No abstract provided'}
+        </p>
+      </div>
+
+      {/* Team Members */}
+      <div className="mb-6">
+        <h4 className="text-sm font-semibold text-[#C83DAD] mb-2">Team Members</h4>
         <div className="flex flex-wrap gap-2">
           {team.participants?.map((member, idx) => (
             <div key={idx} className="flex items-center space-x-2">
@@ -96,22 +112,24 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
             </div>
           ))}
         </div>
-      </td>
-      
-      <td className="px-4 py-6">
-        <div className="flex flex-wrap gap-2">
+      </div>
+
+      {/* Project Links */}
+      <div>
+        <h4 className="text-sm font-semibold text-[#C83DAD] mb-2">Project Links</h4>
+        <div className="flex flex-wrap gap-3">
           {/* Demo Link */}
           {team.submission?.submission_document_url?.find(sub => sub.demo) && (
             <a
               href={team.submission.submission_document_url.find(sub => sub.demo)?.demo}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1 text-white/80 hover:text-[#C83DAD] transition-colors duration-200 text-sm"
+              className="inline-flex items-center space-x-2 text-white/80 hover:text-[#C83DAD] transition-colors duration-200 text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Demo</span>
+              <span>Live Demo</span>
             </a>
           )}
 
@@ -121,12 +139,12 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
               href={team.submission.submission_document_url.find(sub => sub.ppt)?.ppt}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1 text-white/80 hover:text-[#C83DAD] transition-colors duration-200 text-sm"
+              className="inline-flex items-center space-x-2 text-white/80 hover:text-[#C83DAD] transition-colors duration-200 text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span>PPT</span>
+              <span>Presentation</span>
             </a>
           )}
 
@@ -136,12 +154,12 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
               href={team.submission.submission_document_url.find(sub => sub.github)?.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1 text-white/80 hover:text-[#C83DAD] transition-colors duration-200 text-sm"
+              className="inline-flex items-center space-x-2 text-white/80 hover:text-[#C83DAD] transition-colors duration-200 text-sm"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
               </svg>
-              <span>GitHub</span>
+              <span>GitHub Repository</span>
             </a>
           )}
 
@@ -154,7 +172,7 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
                 href={Object.values(sub)[0]}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center space-x-1 text-white/80 hover:text-[#C83DAD] transition-colors duration-200 text-sm"
+                className="inline-flex items-center space-x-2 text-white/80 hover:text-[#C83DAD] transition-colors duration-200 text-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -163,12 +181,12 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
               </a>
             ))}
         </div>
-      </td>
-    </motion.tr>
+      </div>
+    </motion.div>
   );
 
   return (
-    <section className="py-20 bg-black" id="submissions">
+    <section className="py-20" id="submissions">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-[#C83DAD] via-[#DE5FB9] to-[#F481C9] bg-clip-text text-transparent font-corsiva italic">
@@ -186,44 +204,44 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
             <p className="text-white/20">Check back later to see the amazing projects!</p>
           </div>
         ) : (
-          <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/10 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/20">
-                    <th className="px-4 py-4 text-left text-sm font-semibold text-[#C83DAD] uppercase tracking-wider">
-                      Team & Project
-                    </th>
-                    <th className="px-4 py-4 text-left text-sm font-semibold text-[#C83DAD] uppercase tracking-wider">
-                      Team Members
-                    </th>
-                    <th className="px-4 py-4 text-left text-sm font-semibold text-[#C83DAD] uppercase tracking-wider">
-                      Project Links
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Finalist Teams */}
-                  {finalistTeams.length > 0 && (
-                    <>
-                      {finalistTeams.map(team => renderTeamRow(team, true))}
-                      {otherTeams.length > 0 && (
-                        <tr>
-                          <td colSpan={3} className="px-4 py-4">
-                            <div className="border-t border-white/20 pt-4">
-                              <h3 className="text-lg font-semibold text-white/80 mb-2">Other Submissions</h3>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </>
-                  )}
-                  
-                  {/* Other Teams */}
-                  {otherTeams.map(team => renderTeamRow(team, false))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-8">
+            {/* Finalist Teams */}
+            {finalistTeams.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-white flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-[#C83DAD] to-[#F481C9] rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">★</span>
+                    </div>
+                    <span>Finalist Teams</span>
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {finalistTeams.map(team => renderTeamCard(team, true))}
+                </div>
+              </div>
+            )}
+
+            {/* Other Teams Toggle */}
+            {otherTeams.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-white">Other Submissions</h3>
+                  <button
+                    onClick={() => setShowOtherSubmissions(!showOtherSubmissions)}
+                    className="px-6 py-2 bg-gradient-to-r from-[#C83DAD] to-[#F481C9] text-white rounded-lg hover:from-[#C83DAD]/80 hover:to-[#F481C9]/80 transition-all duration-300 font-medium"
+                  >
+                    {showOtherSubmissions ? 'Hide' : `Show ${otherTeams.length} Other Submissions`}
+                  </button>
+                </div>
+                
+                {showOtherSubmissions && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {otherTeams.map(team => renderTeamCard(team, false))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -232,4 +250,5 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
 };
 
 export default Submissions;
+
 
