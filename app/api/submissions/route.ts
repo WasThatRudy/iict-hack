@@ -6,31 +6,35 @@ export async function GET() {
     await connectDB();
 
     // Fetch teams and submissions separately
-    const teams = await TeamRegistration.find({});
-    const submissions = await Submission.find({}).sort({});
+    const teams = await TeamRegistration.find({}).sort({ createdAt: -1 });
+    const submissions = await Submission.find({});
 
-    // Match submissions with teams using team_id
-    const teamsWithSubmissions = teams.map(team => {
-      const teamSubmissions = submissions.filter(submission => 
-        submission.team_id.toString() === team._id.toString()
-      );
+    // Match submissions with teams using team_id and filter out teams without submissions
+    const teamsWithSubmissions = teams
+      .map(team => {
+        const teamSubmission = submissions.find(submission => 
+          submission.team_id.toString() === team._id.toString()
+        );
 
-      return {
-        _id: team._id,
-        team_name: team.team_name,
-        idea_title: team.idea_title,
-        idea_document_url: team.idea_document_url,
-        participants: team.participants.map((participant: any) => ({
-          name: participant.name,
-          github_profile: participant.github_profile,
-          linkedin_profile: participant.linkedin_profile
-        })),
-        submissions: teamSubmissions.map(submission => ({
-          submission_document_url: submission.submission_document_url,
-          createdAt: submission.createdAt
-        }))
-      };
-    });
+        return {
+          _id: team._id,
+          team_name: team.team_name,
+          idea_title: team.idea_title,
+          idea_document_url: team.idea_document_url,
+          participants: team.participants.map((participant: any) => ({
+            name: participant.name,
+            github_profile: participant.github_profile,
+            linkedin_profile: participant.linkedin_profile
+          })),
+          submission: teamSubmission ? {
+            submission_document_url: teamSubmission.submission_document_url,
+            createdAt: teamSubmission.createdAt,
+            abstract: teamSubmission.abstract,
+            status: teamSubmission.status
+          } : null
+        };
+      })
+      .filter(team => team.submission !== null);
 
     return NextResponse.json({ submissions: teamsWithSubmissions }, { status: 200 });
 

@@ -52,10 +52,10 @@ export default function Home() {
         <SectionDecorations variant="hero" />
         <Hero />
       </section>
-      {/* <section id="submissions" className="min-h-screen relative">
+      <section id="submissions" className="min-h-screen relative">
         <SectionDecorations variant="submissions" />
         <Submissions submissions={submissions} />
-      </section> */}
+      </section>
       <section id="themes" className="min-h-screen relative">
         <SectionDecorations variant="themes" />
         <Themes/>
