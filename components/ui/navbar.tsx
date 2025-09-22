@@ -156,7 +156,7 @@ export default function AnimatedNavbar() {
 
         {/* Right Side: Auth/Account */}
         <div className="hidden md:block">
-          {isLoggedIn ? (
+          {/* {isLoggedIn ? (
             <AccountMenu
               teamName={teamName}
               onGoToDashboard={() => router.push('/dashboard')}
@@ -178,7 +178,7 @@ export default function AnimatedNavbar() {
             >
               Login
             </motion.button>
-          )}
+          )} */}
         </div>
 
         {/* Mobile Menu Button */}
@@ -209,7 +209,7 @@ export default function AnimatedNavbar() {
                   {link.title}
                 </a>
               ))}
-              {isLoggedIn ? (
+              {/* {isLoggedIn ? (
                 <div className="mt-8">
                   <AccountMenu
                     teamName={teamName || 'Team'}
@@ -234,7 +234,7 @@ export default function AnimatedNavbar() {
                 >
                   Login
                 </motion.button>
-              )}
+              )} */}
             </div>
           </div>
         )}
