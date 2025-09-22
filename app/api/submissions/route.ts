@@ -5,6 +5,7 @@ interface Participant {
   name: string;
   github_profile?: string;
   linkedin_profile?: string;
+  college_or_company_name?: string;
 }
 
 export async function GET() {
@@ -30,7 +31,8 @@ export async function GET() {
           participants: team.participants.map((participant: Participant) => ({
             name: participant.name,
             github_profile: participant.github_profile,
-            linkedin_profile: participant.linkedin_profile
+            linkedin_profile: participant.linkedin_profile,
+            college_or_company_name: participant.college_or_company_name,
           })),
           submission: teamSubmission ? {
             submission_document_url: teamSubmission.submission_document_url,
