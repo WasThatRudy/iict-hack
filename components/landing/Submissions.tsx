@@ -27,12 +27,11 @@ interface SubmissionsProps {
 }
 
 const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
-  const [loading, setLoading] = useState(true);
   const [showOtherSubmissions, setShowOtherSubmissions] = useState(false);
+  const [emptyStateDelayDone, setEmptyStateDelayDone] = useState(false);
 
   useEffect(() => {
-    // Simulate loading for better UX
-    const timer = setTimeout(() => setLoading(false), 1000);
+    const timer = setTimeout(() => setEmptyStateDelayDone(true), 700);
     return () => clearTimeout(timer);
   }, []);
 
@@ -44,7 +43,9 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
     .filter(team => team.submission?.status !== 'finalist')
     .sort((a, b) => a.team_name.localeCompare(b.team_name));
 
-  if (loading) {
+  const shouldShowSkeleton = submissions.length === 0 && !emptyStateDelayDone;
+
+  if (shouldShowSkeleton) {
     return (
       <section className="py-20" id="submissions">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
