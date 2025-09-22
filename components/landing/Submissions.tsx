@@ -28,12 +28,8 @@ interface SubmissionsProps {
 
 const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
   const [showOtherSubmissions, setShowOtherSubmissions] = useState(false);
-  const [emptyStateDelayDone, setEmptyStateDelayDone] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setEmptyStateDelayDone(true), 700);
-    return () => clearTimeout(timer);
-  }, []);
+  // Keep showing skeleton until data is provided by the parent
 
   // Separate finalist and non-finalist teams, then sort alphabetically by team name
   const finalistTeams = submissions
@@ -43,7 +39,7 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
     .filter(team => team.submission?.status !== 'finalist')
     .sort((a, b) => a.team_name.localeCompare(b.team_name));
 
-  const shouldShowSkeleton = submissions.length === 0 && !emptyStateDelayDone;
+  const shouldShowSkeleton = submissions.length === 0;
 
   if (shouldShowSkeleton) {
     return (
@@ -233,12 +229,7 @@ const Submissions: React.FC<SubmissionsProps> = ({ submissions }) => {
           </p>
         </div>
 
-        {submissions.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-white/40 text-lg mb-4">No submissions available yet</div>
-            <p className="text-white/20">Check back later to see the amazing projects!</p>
-          </div>
-        ) : (
+        {submissions.length > 0 && (
           <div className="space-y-8">
             {/* Finalist Teams */}
             {finalistTeams.length > 0 && (
