@@ -81,7 +81,7 @@ const Dashboard = () => {
     video: ''
   });
   // Toggle this single variable to open/close submission manually
-  const SUBMISSION_WINDOW_OPEN = true;
+  const SUBMISSION_WINDOW_OPEN = false;
   const isSubmissionOpen = SUBMISSION_WINDOW_OPEN;
   const router = useRouter();
 
