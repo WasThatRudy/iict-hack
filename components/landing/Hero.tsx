@@ -1,48 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
 import Image from "next/image";
 import defaults from "@/public/images/default.svg";
 import variant from "@/public/images/variant.svg";
-import { useRouter } from "next/navigation";
-
 // Animation variants removed for better performance on slow systems
 
 export function Hero() {
   // State to manage the hover effect for the logo
   const [isLogoHovered, setIsLogoHovered] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const router = useRouter();
-
-  // Initialize auth state on mount
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-    // No need to read team_name here
-  }, []);
-
-  // Listen for cross-tab updates
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'token') {
-        setIsLoggedIn(!!e.newValue);
-      }
-      // Ignore team_name updates here
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
-
-  // Listen for explicit same-tab auth updates
-  useEffect(() => {
-    const handleAuthUpdated = () => {
-      const token = localStorage.getItem('token');
-      setIsLoggedIn(!!token);
-    };
-    window.addEventListener('auth-updated', handleAuthUpdated as EventListener);
-    return () => window.removeEventListener('auth-updated', handleAuthUpdated as EventListener);
-  }, []);
 
   return (
     // Set background to black and default text to white

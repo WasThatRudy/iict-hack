@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import logo from "@/public/images/shortlogo.png";
-import ConfirmLogout from "@/components/ui/confirm-logout";
-import AccountMenu from "@/components/ui/account-menu";
 import Link from "next/link";
 
 const navLinks = [
@@ -23,49 +21,9 @@ export default function AnimatedNavbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const router = useRouter();
-  const [teamName, setTeamName] = useState<string>("");
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsLoggedIn(true);
-    }
-    const storedName = localStorage.getItem('team_name') || "";
-    setTeamName(storedName);
-  }, []);
-  // Sync auth state when route changes within the same tab
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-    const storedName = localStorage.getItem('team_name') || "";
-    setTeamName(storedName);
-  }, [pathname]);
-  // Listen for explicit auth updates dispatched within the same tab
-  useEffect(() => {
-    const handleAuthUpdated = () => {
-      const token = localStorage.getItem('token');
-      setIsLoggedIn(!!token);
-      const storedName = localStorage.getItem('team_name') || "";
-      setTeamName(storedName);
-    };
-    window.addEventListener('auth-updated', handleAuthUpdated as EventListener);
-    return () => window.removeEventListener('auth-updated', handleAuthUpdated as EventListener);
-  }, []);
+
+
   // Reflect token changes across tabs
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'token') {
-        setIsLoggedIn(!!e.newValue);
-      }
-      if (e.key === 'team_name') {
-        setTeamName(e.newValue || "");
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
   // Function to track register button clicks
   // const trackClick = async (buttonType: string) => {
   //   try {
@@ -241,21 +199,20 @@ export default function AnimatedNavbar() {
       </AnimatePresence>
 
       {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
+      {/* {showLogoutConfirm && (
         <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-lg md:hidden">
           <ConfirmLogout
             open={showLogoutConfirm}
             onCancel={() => setShowLogoutConfirm(false)}
             onConfirm={() => {
               localStorage.removeItem('token');
-              setIsLoggedIn(false);
               setShowLogoutConfirm(false);
               window.dispatchEvent(new Event('auth-updated'));
               router.push('/');
             }}
           />
         </div>
-      )}
+      )} */}
     </>
   );
 }
