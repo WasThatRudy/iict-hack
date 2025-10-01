@@ -21,7 +21,14 @@ interface TeamSubmission {
     name: string;
     github_profile?: string;
     linkedin_profile?: string;
+    college_or_company_name?: string;
   }>;
+  submission?: {
+    submission_document_url: Array<Record<string, string>>;
+    createdAt: string;
+    abstract?: string;
+    status?: string;
+  };
 }
 
 export default function Home() {
@@ -30,14 +37,13 @@ export default function Home() {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const response = await fetch('/api/submissions');
+        const response = await fetch('/finalists/finalists.json');
         if (response.ok) {
           const data = await response.json();
           setSubmissions(data.submissions || []);
         }
       } catch (error) {
         console.error('Error fetching submissions:', error);
-      } finally {
       }
     };
 
